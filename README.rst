@@ -1,3 +1,37 @@
+Slack Bot for OpenStreetMap (slackbot-osm)
+==========
+
+Description
+-----------
+
+Slack bot for OpenStreetMap.
+
+Installation
+------------
+
+.. code-block:: bash
+
+    pip install git+git://github.com/pjdufour/slackbot-osm.git@master
+
+Usage
+-----
+
+Add the following to slackbotosm/local_settings.py
+
+.. code-block:: python
+    GEOWATCH_CONFIG = {
+        "authtoken": "XXXX"
+    }
+
+
+Contributing
+------------
+
+We are currently accepting pull requests for this repository. Please provide a human-readable description with a pull request and update the README.rst file as needed.
+
+License
+-------
+
 Copyright (c) 2015, Patrick Dufour
 All rights reserved.
 
