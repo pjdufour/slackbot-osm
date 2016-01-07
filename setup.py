@@ -16,6 +16,8 @@ setup(
     download_url="https://github.com/pjdufour/slackbot-osm/zipball/master",
     packages=[
         "slackbotosm",
+        "slackbotosm.broker",
+        "slackbotosm.mapping",
         "slackbotosm.tests"],
     classifiers = [
         'Development Status :: 4 - Beta',
