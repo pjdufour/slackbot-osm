@@ -32,7 +32,7 @@ We are currently accepting pull requests for this repository. Please provide a h
 License
 -------
 
-Copyright (c) 2015, Patrick Dufour
+Copyright (c) 2016, Patrick Dufour
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
