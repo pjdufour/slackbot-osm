@@ -11,7 +11,7 @@ class GeoWatchMappingProject(GeoWatchMapping):
         project = kwargs.get("project", None)
         counter = kwargs.get("counter", None)
         message = {
-            "title": "Project "+str(project),
+            "title": "HOT Project "+str(project),
             "project": str(project),
             "url_view": URL_PROJECT_VIEW.format(project=project),
             "url_edit": URL_PROJECT_EDIT.format(project=project),
@@ -22,6 +22,9 @@ class GeoWatchMappingProject(GeoWatchMapping):
             "count_validated": counter[str(TASK_STATE_VALIDATED)],
             "count_removed": counter[str(TASK_STATE_REMOVED)]
         }
+        total = message["count_done"] + message["count_ready"] + message["count_validated"] + message["count_invalidated"]
+        message["percent"] = 100.0 * (message["count_done"] + message["count_validated"]) / total
+
         return message
 
     def __init__(self):

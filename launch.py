@@ -4,6 +4,7 @@ from geowatchutil.runtime import build_broker_kwargs
 
 from slackbotosm import settings
 from slackbotosm.broker.base import SlackBotOSMBroker
+from slackbotosm.utils import load_templates
 
 verbose = True
 
@@ -12,9 +13,7 @@ with open("slackbotosm/bot.yml", 'r') as f:
     broker_config = yaml.load(f)
 #print "Broker Config: ", broker_config
 
-templates = None
-with open("slackbotosm/templates.yml", 'r') as f:
-    templates = yaml.load(f)
+templates = load_templates()
 #print "##############"
 #print "Templates: ", templates
 

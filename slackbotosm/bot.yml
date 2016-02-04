@@ -4,7 +4,7 @@ description: "This broker responds to /osm in Slack Channels"
 duplex:
   - backend: slack
     codec: slack
-    topic: general
+    topic: test  # The topic to reply back to.
     topic_check: false
     # Slack API doesn't support bot's joining channels automatically.
     # Need to do /invite @botname in channel UI.

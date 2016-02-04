@@ -5,8 +5,9 @@ from geowatchutil.base import GeoWatchError
 from geowatchutil.broker.base import GeoWatchBroker
 from geowatchutil.codec.geowatch_codec_slack import GeoWatchCodecSlack
 
-from slackbotosm.enumerations import PATTERN_PROJECT, PATTERN_USER, URL_PROJECT_VIEW, URL_PROJECT_EDIT, URL_PROJECT_TASKS
+from slackbotosm.enumerations import URL_PROJECT_VIEW, URL_PROJECT_EDIT, URL_PROJECT_TASKS
 from slackbotosm.mapping.base import GeoWatchMappingProject
+from slackbotosm.utils import load_patterns
 
 class SlackBotOSMBroker(GeoWatchBroker):
     """
@@ -14,6 +15,7 @@ class SlackBotOSMBroker(GeoWatchBroker):
     """
     _user_id = None  # Dervied from consumer authtoken
     _user_name = None  # Dervied from consumer authtoken
+    patterns = None
 
     def _make_request(self, url, params=None, data=None, cookie=None, contentType=None):
         """
@@ -61,14 +63,37 @@ class SlackBotOSMBroker(GeoWatchBroker):
                     channel = m[u'channel']
 
                     print "testing Message", m
-                    if text.startswith("<@"+self._user_id+">"):
-                        match = re.match(PATTERN_PROJECT, text)
-                        if match:
-                            self._request_project(match.group("project"))
-                        else:
-                            match = re.match(PATTERN_USER, text)
-                            #if match:
-                            #    self._req_user(m)
+                    match_question = None
+                    match_value = None
+                    for question in self.patterns:
+                        for pattern in self.patterns[question]:
+                            match_value = re.search(pattern, text, re.M|re.I)
+                            if match_value:
+                                match_question = question
+                                break
+                        if match_value:
+                            break
+
+                    if match_value:
+                        outgoing = None
+                        print "Match Question: ", match_question
+                        print "Match Value: ", match_value
+                        if match_question == "project":
+                            try:
+                                ctx = self._request_project(match_value.group("project"))
+                                t = self.templates.get('SLACK_MESSAGE_TEMPLATE_PROJECT', None)
+                                if t:
+                                    outgoing = self.codec_slack.render(ctx, t=t)
+                            except:
+                                print "Error processing match for original text: ", text
+                        elif match_question == "user":
+                            pass
+
+                        if outgoing:
+                            print "Sending message ..."
+                            print "+ Data = ", outgoing
+                            self.duplex[0]._channel.send_message(outgoing)
+
 
     def _request_project(self, project):
 
@@ -88,22 +113,16 @@ class SlackBotOSMBroker(GeoWatchBroker):
             "3": 0,
             "-1": 0
         }
+
         for f in data[u'features']:
             p = f[u'properties']
             state = str(p.get(u'state', None))
             counter[state] = counter[state] + 1
 
-        ctx = GeoWatchMappingProject().forward(project=int(project), counter=counter)
-        t = self.templates.get('SLACK_MESSAGE_TEMPLATE_PROJECT', None)
-        if t:
-            data = self.codec_slack.render(ctx, t=t)
-            print "Data: ", data
-            self.duplex[0]._channel.send_message(data)
-        else:
-            raise GeoWatchError("Could not find template")
+        return GeoWatchMappingProject().forward(project=int(project), counter=counter)
 
     def _req_user(self, messages):
-        pass
+        passs
 
     def __init__(self, name, description, templates=None, duplex=None, consumers=None, producers=None, stores_out=None, filter_metadata=None, sleep_period=5, count=1, timeout=5, deduplicate=False, verbose=False):  # noqa
         super(SlackBotOSMBroker, self).__init__(
@@ -126,3 +145,5 @@ class SlackBotOSMBroker(GeoWatchBroker):
         self._user_name = self.duplex[0]._client._user_name
 
         self.codec_slack = GeoWatchCodecSlack()
+
+        self.patterns = load_patterns()

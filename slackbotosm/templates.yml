@@ -2,9 +2,10 @@ SLACK_MESSAGE_TEMPLATE_PROJECT:
   attachments:
     - title: "{title}"
       title_link: "{url_view}"
-      fallback: "Project {project} has the following counts: {count_ready} ready, {count_invalidated} invalidated, {count_done} done, {count_validated} validated, {count_removed} removed."
-      text:  "Project <{url_view}|{project}> has the following counts: {count_ready} ready, {count_invalidated} invalidated, {count_done} done, {count_validated} validated, {count_removed} removed."
+      fallback: "HOT Project {project} is {percent}% done, based on task counts: {count_ready} ready, {count_invalidated} invalidated, {count_done} done, {count_validated} validated, {count_removed} removed."
+      text:  "HOT Project <{url_view}|{project}> is *{percent}%* done, based on task counts: *{count_ready}* ready, *{count_invalidated}* invalidated, *{count_done}* done, *{count_validated}* validated, *{count_removed}* removed."
       color: "#000099"
+      "mrkdwn_in": ["text", "pretext"]
       fields:
         - title: "View Project"
           value: "<{url_view}|View>"
