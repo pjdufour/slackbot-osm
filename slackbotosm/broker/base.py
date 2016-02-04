@@ -92,7 +92,7 @@ class SlackBotOSMBroker(GeoWatchBroker):
                         if outgoing:
                             print "Sending message ..."
                             print "+ Data = ", outgoing
-                            self.duplex[0]._channel.send_message(outgoing)
+                            self.duplex[0]._channel.send_message(outgoing, topic=channel)
 
 
     def _request_project(self, project):
