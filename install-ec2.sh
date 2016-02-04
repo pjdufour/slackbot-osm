@@ -10,6 +10,7 @@ sudo apt-get update
 # Essential build tools and libraries
 sudo apt-get install -y build-essential gettext git python-dev python-pip python-virtualenv
 sudo apt-get install -y python-bs4 python-httplib2
+sudo apt-get install -y supervisor
 sudo pip install virtualenvwrapper
 #Add all these lines to ~/.bash_aliases
 echo 'export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python' >> ~/.bash_aliases

@@ -7,3 +7,4 @@ python-dateutil
 pymongo
 slackclient
 git+git://github.com/geowatch/geowatch-util@master
+pyyaml

@@ -6,7 +6,7 @@ from slackbotosm import settings
 from slackbotosm.broker.base import SlackBotOSMBroker
 from slackbotosm.utils import load_templates
 
-verbose = True
+verbose = False
 
 broker_config = None
 with open("slackbotosm/bot.yml", 'r') as f:

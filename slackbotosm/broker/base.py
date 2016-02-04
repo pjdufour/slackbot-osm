@@ -62,7 +62,7 @@ class SlackBotOSMBroker(GeoWatchBroker):
                     text = m[u'text']
                     channel = m[u'channel']
 
-                    print "testing Message", m
+                    #print "testing Message", m
                     match_question = None
                     match_value = None
                     for question in self.patterns:
