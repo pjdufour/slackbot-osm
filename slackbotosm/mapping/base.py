@@ -2,7 +2,7 @@ from geowatchutil.mapping.base import GeoWatchMapping
 
 from slackbotosm import settings
 
-from slackbotosm.enumerations import URL_PROJECT_VIEW, URL_PROJECT_EDIT, URL_PROJECT_TASKS, TASK_STATE_READY, TASK_STATE_INVALIDATED, TASK_STATE_DONE, TASK_STATE_VALIDATED, TASK_STATE_REMOVED
+from slackbotosm.enumerations import URL_PROJECT_VIEW, URL_PROJECT_EDIT, URL_PROJECT_TASKS, URL_CHANGESET_VIEW, URL_USER_VIEW, TASK_STATE_READY, TASK_STATE_INVALIDATED, TASK_STATE_DONE, TASK_STATE_VALIDATED, TASK_STATE_REMOVED
 
 
 class GeoWatchMappingProject(GeoWatchMapping):
@@ -29,3 +29,23 @@ class GeoWatchMappingProject(GeoWatchMapping):
 
     def __init__(self):
         super(GeoWatchMappingProject, self).__init__()
+
+
+class GeoWatchMappingChangeset(GeoWatchMapping):
+
+    def forward(self, **kwargs):
+        id = kwargs.get("id", -1)
+        message = {
+            "title": "OSM Changeset "+str(id),
+            "changeset": str(id),
+            "date": kwargs.get("closed_at", ""),
+            "imagery": kwargs.get("imagery_used", "unknown"),
+            "comment": kwargs.get("comment", ""),
+            "user": kwargs.get("user", ""),
+            "url_changeset_view": URL_CHANGESET_VIEW.format(changeset=id),
+            "url_user_view": URL_USER_VIEW.format(user=kwargs.get("user",""))
+        }
+        return message
+
+    def __init__(self):
+        super(GeoWatchMappingChangeset, self).__init__()

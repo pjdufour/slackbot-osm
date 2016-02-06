@@ -1,12 +1,14 @@
 import json
 import re
 
+import defusedxml.ElementTree as et
+
 from geowatchutil.base import GeoWatchError
 from geowatchutil.broker.base import GeoWatchBroker
 from geowatchutil.codec.geowatch_codec_slack import GeoWatchCodecSlack
 
-from slackbotosm.enumerations import URL_PROJECT_VIEW, URL_PROJECT_EDIT, URL_PROJECT_TASKS
-from slackbotosm.mapping.base import GeoWatchMappingProject
+from slackbotosm.enumerations import URL_PROJECT_VIEW, URL_PROJECT_EDIT, URL_PROJECT_TASKS, URL_CHANGESET_API
+from slackbotosm.mapping.base import GeoWatchMappingProject, GeoWatchMappingChangeset
 from slackbotosm.utils import load_patterns
 
 class SlackBotOSMBroker(GeoWatchBroker):
@@ -80,14 +82,21 @@ class SlackBotOSMBroker(GeoWatchBroker):
                         print "Match Value: ", match_value
                         if match_question == "project":
                             try:
-                                ctx = self._request_project(match_value.group("project"))
+                                ctx = self._request_project(match_value.group("project"), URL_PROJECT_TASKS)
                                 t = self.templates.get('SLACK_MESSAGE_TEMPLATE_PROJECT', None)
                                 if t:
                                     outgoing = self.codec_slack.render(ctx, t=t)
                             except:
                                 print "Error processing match for original text: ", text
-                        elif match_question == "user":
-                            pass
+                        elif match_question == "changeset":
+                            try:
+                                ctx = self._request_changeset(match_value.group("changeset"), URL_CHANGESET_API)
+                                t = self.templates.get('SLACK_MESSAGE_TEMPLATE_CHANGESET', None)
+                                if t:
+                                    outgoing = self.codec_slack.render(ctx, t=t)
+                            except:
+                                print "Error processing match for original text: ", text
+                                raise
 
                         if outgoing:
                             print "Sending message ..."
@@ -95,9 +104,9 @@ class SlackBotOSMBroker(GeoWatchBroker):
                             self.duplex[0]._channel.send_message(outgoing, topic=channel)
 
 
-    def _request_project(self, project):
+    def _request_project(self, project, baseurl):
 
-        url = URL_PROJECT_TASKS.format(project=project)
+        url = baseurl.format(project=project)
         request = self._make_request(url, contentType="application/json")
 
         if request.getcode () != 200:
@@ -120,6 +129,28 @@ class SlackBotOSMBroker(GeoWatchBroker):
             counter[state] = counter[state] + 1
 
         return GeoWatchMappingProject().forward(project=int(project), counter=counter)
+
+    def _request_changeset(self, changesetID, baseurl):
+
+        url = baseurl.format(changeset=changesetID)
+        request = self._make_request(url, contentType="text/xml")
+
+        if request.getcode () != 200:
+            raise Exception("Could not fetch xml for changeset "+changesetID+".")
+
+        response = request.read()
+        root = et.fromstring(response)
+
+        kwargs = {
+            'id': changesetID
+        }
+        for changeset in root.findall('changeset'):
+            kwargs['user'] = changeset.get('user')
+            kwargs['closed_at'] = changeset.get('closed_at')
+            for tag in changeset.findall('tag'):
+                kwargs[tag.get('k')] = tag.get('v', '')
+
+        return GeoWatchMappingChangeset().forward(**kwargs)
 
     def _req_user(self, messages):
         passs
